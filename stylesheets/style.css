@@ -1,0 +1,17 @@
+html{
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+body{
+    padding:50px;
+    font:14px "Lucida Grande",Helvetica,Arial,sans-serif;
+}
+
+a{
+    color:#00B7FF;
+}
+
+canvas{
+    border: 5px solid #ccc;
+}
