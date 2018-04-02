@@ -1,4 +1,7 @@
 //sourceURL=pen.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+
 var el = document.getElementById('DrawingSpace');
 var ctx = el.getContext('2d');
 var isDrawing;
@@ -7,7 +10,7 @@ var startingStroke = true;
 function draw(){
     //determine which brush is currently being used
     if(parseInt(document.getElementById("brushSelected").value, 10) == 1)//simple brush
-    { 
+    {
         el.onmousedown = function(e) {
             if(!isDrawing){
                 ctx.beginPath();
