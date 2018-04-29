@@ -7,9 +7,6 @@ var startingStroke = true;
 var points = [];
 var clientX, clientY, timeout;
 var density = 50;
-var img = new Image();
-img.src = 'http://www.tricedesigns.com/wp-content/uploads/2012/01/brush2.png';
-img.width = 10;
 
 function draw(){
     el.onmousedown = function(e) {
@@ -40,12 +37,6 @@ function draw(){
                 break;
             case 8: //brush, fur, pen
                 BezierCurves_onmousedown(e);
-                break;
-            case 9: //fur (rotating strokes)
-                BrushFurPen_onmousedown(e);
-                break;
-            case 10: //variable segment width
-                FurRotatingStrokes_onmousedown(e);
                 break;
             case 11: //multiple strokes
                 PenVariableSegmentWidth_onmousedown(e);
@@ -90,7 +81,7 @@ function draw(){
                 ColoredPixels_onmousedown(e);
                 break;
             case 25: //time-based spray
-                Spray_onmousedown(e);
+                Spray1_onmousedown(e);
                 break;
             case 26: //Time-based spray with round distribution
                 TimeBasedSpray_onmousedown(e);
@@ -100,6 +91,15 @@ function draw(){
                 break;
             case 28: //Neighbor points connection
                 RandomizingDots_onmousedown(e);
+                break; 
+            case 29: //Blur Brush
+                Blur_onmousedown(e);
+                break; 
+            case 30: //blend Brush
+                Blur_onmousedown(e);
+                break; 
+            case 31: //smudge Brush
+                Blur_onmousedown(e);
                 break; 
             default:
                 SimplePencil_onmousedown(e);
@@ -134,12 +134,6 @@ function draw(){
                 break;
             case 8: //brush, fur, pen
                 BezierCurves_onmousemove(e);
-                break;
-            case 9: //fur (rotating strokes)
-                BrushFurPen_onmousemove(e);
-                break;
-            case 10: //variable segment width
-                FurRotatingStrokes_onmousemove(e);
                 break;
             case 11: //multiple strokes
                 PenVariableSegmentWidth_onmousemove(e);
@@ -184,7 +178,7 @@ function draw(){
                 ColoredPixels_onmousemove(e);
                 break;
             case 25: //time-based spray
-                Spray_onmousemove(e);
+                Spray1_onmousemove(e);
                 break;
             case 26: //Time-based spray with round distribution
                 TimeBasedSpray_onmousemove(e);
@@ -229,12 +223,6 @@ function draw(){
             case 8: //brush, fur, pen
                 BezierCurves_onmouseup();
                 break;
-            case 9: //fur (rotating strokes)
-                BrushFurPen_onmouseup();
-                break;
-            case 10: //variable segment width
-                FurRotatingStrokes_onmouseup();
-                break;
             case 11: //multiple strokes
                 PenVariableSegmentWidth_onmouseup();
                 break;
@@ -278,7 +266,7 @@ function draw(){
                 ColoredPixels_onmouseup();
                 break;
             case 25: //time-based spray
-                Spray_onmouseup();
+                Spray1_onmouseup();
                 break;
             case 26: //Time-based spray with round distribution
                 TimeBasedSpray_onmouseup();
@@ -326,8 +314,11 @@ function midPointBtw(p1, p2) {
 function getRandomInt(min, max) {
     return Math.abs(Math.floor(Math.random() * (max - min + 1)) + min);
 }
+function getRandomFloat(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
-function drawStar(x, y, l) {
+function drawStar1(x, y, l) {
   var length = l;
   ctx.save();
   ctx.translate(x, y);
@@ -347,7 +338,7 @@ function drawStar(x, y, l) {
   ctx.restore();
 }
 
-function drawStar(x, y, l, angle) {
+function drawStar2(x, y, l, angle) {
   var length = l;
   ctx.save();
   ctx.translate(x, y);
@@ -448,7 +439,9 @@ function DryBrush_onmousedown(e)
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
-    density = 40;
+    ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    density = 15;
 }
 
 function EdgeSmoothingWithShadows_onmousedown(e)
@@ -476,7 +469,7 @@ function PointBasedApproach_onmousedown(e)
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
 }
 
-function PointBasedWithShadows_onmousedown(e)
+function PointBasedWithShadows_onmousedown(e)//6
 {
     if(!isDrawing){
         ctx.beginPath();
@@ -495,7 +488,7 @@ function EdgeSmoothingWithRadialGradient_onmousedown(e)
     }
     isDrawing = true;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
-    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
+    radius = document.getElementById("brushSizeNumberForm").value;
 }
 
 function BezierCurves_onmousedown(e)
@@ -505,27 +498,8 @@ function BezierCurves_onmousedown(e)
     }
     isDrawing = true;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
+    ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
-}
-
-function BrushFurPen_onmousedown(e)
-{
-    if(!isDrawing){
-        ctx.beginPath();
-    }
-    isDrawing = true;
-    ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
-    lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
-}
-
-function FurRotatingStrokes_onmousedown(e)
-{
-    if(!isDrawing){
-        ctx.beginPath();
-    }
-    isDrawing = true;
-    ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
-    lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
 }
 
 function PenVariableSegmentWidth_onmousedown(e)
@@ -538,7 +512,7 @@ function PenVariableSegmentWidth_onmousedown(e)
     points.push({ 
       x: e.clientX - el.offsetLeft, 
       y: e.clientY - el.offsetTop,
-      width: getRandomInt(Math.abs(document.getElementById("brushSizeNumberForm").value - 2), document.getElementById("brushSizeNumberForm").value)
+      width: getRandomInt(0, document.getElementById("brushSizeNumberForm").value)
     });
 }
 
@@ -550,6 +524,7 @@ function PenMultipleStrokes_onmousedown(e)
     isDrawing = true;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
 }
@@ -561,6 +536,7 @@ function ThickBrush_onmousedown(e)
     }
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.lineJoin = ctx.lineCap = 'butt';
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -573,6 +549,7 @@ function SlicedStrokes_onmousedown(e)
     }
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -585,6 +562,7 @@ function SlicedStrokesWithOpacity_onmousedown(e)
     }
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -598,6 +576,7 @@ function MultipleLines_onmousedown(e)
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
     ctx.lineJoin = ctx.lineCap = 'round';
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 }
@@ -609,6 +588,7 @@ function MultipleLinesWithOpacity_onmousedown(e)
     }
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    radius = document.getElementById("brushSizeNumberForm").value;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
@@ -620,9 +600,10 @@ function StampLikeBasic_onmousedown(e)
         ctx.beginPath();
     }
     isDrawing = true;
-    ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    ctx.lineWidth = 1;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
+    ctx.strokeStyle = "#000000";
     radius = document.getElementById("brushSizeNumberForm").value;
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 }
@@ -633,9 +614,10 @@ function StampLikeTrailEffect_onmousedown(e)
         ctx.beginPath();
     }
     isDrawing = true;
-    ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
+    ctx.lineWidth = 1;
     ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
-    ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
+    ctx.strokeStyle = "#000000";
+    radius = document.getElementById("brushSizeNumberForm").value;
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
 }
 
@@ -661,14 +643,17 @@ function Stars_onmousedown(e)
 {
     isDrawing = true;
     radius = document.getElementById("brushSizeNumberForm").value;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
-    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop, l: document.getElementById("brushSizeNumberForm").value });
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop, l: radius });
 }
 
 function StarsWithRotation_onmousedown(e)
 {
     isDrawing = true;
+    ctx.lineWidth = 1;
     ctx.lineJoin = ctx.lineCap = 'round';
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     radius = document.getElementById("brushSizeNumberForm").value;
@@ -691,7 +676,7 @@ function ColoredPixels_onmousedown(e)
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
 }
 
-function Spray_onmousedown(e)
+function Spray1_onmousedown(e)
 {
     if(!isDrawing){
         ctx.beginPath();
@@ -700,12 +685,14 @@ function Spray_onmousedown(e)
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
     ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
+    ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     density = 50;
 }
 
 function TimeBasedSpray_onmousedown(e)
 {
+    ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
     clientX = e.clientX - el.offsetLeft;
     clientY = e.clientY - el.offsetTop;
@@ -725,6 +712,7 @@ function TimeBasedSpray_onmousedown(e)
 
 function TimeBasedSprayWithRoundDistribution_onmousedown(e)
 {
+    ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
     clientX = e.clientX - el.offsetLeft;
     clientY = e.clientY - el.offsetTop;
@@ -732,11 +720,11 @@ function TimeBasedSprayWithRoundDistribution_onmousedown(e)
 
     timeout = setTimeout(function spray() {
       for (var i = density; i--; ) {
-        var angle = getRandomFloat(0, Math.PI*2);
-        var radius = getRandomFloat(0, 20);
+        var angle2 = getRandomFloat(0, Math.PI*2);
+        var radius2 = getRandomFloat(0, 20);
         ctx.fillRect(
-          clientX + radius * Math.cos(angle),
-          clientY + radius * Math.sin(angle), 
+          clientX + radius2 * Math.cos(angle2),
+          clientY + radius2 * Math.sin(angle2), 
           1, 1);
       }
       if (!timeout) return;
@@ -747,6 +735,7 @@ function TimeBasedSprayWithRoundDistribution_onmousedown(e)
 function RandomizingDots_onmousedown(e)
 {
     density = 40;
+    ctx.fillStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.lineJoin = ctx.lineCap = 'round';
     clientX = e.clientX - el.offsetLeft;
     clientY = e.clientY - el.offsetTop;
@@ -766,15 +755,23 @@ function RandomizingDots_onmousedown(e)
     }, 50);
 }
 
-function NeighborPointsConnection_onmousedown(e)
+function Blur_onmousedown(e)
 {
-    if(!isDrawing){
-        ctx.beginPath();
-    }
     isDrawing = true;
-    ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
-    ctx.lineJoin = ctx.lineCap = 'round';
-    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    radius = document.getElementById("brushSizeNumberForm").value;
+}
+
+function Blend_onmousedown(e){
+    isDrawing = true;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    radius = document.getElementById("brushSizeNumberForm").value;
+}
+
+function Smudge_onmousedown(e){
+    isDrawing = true;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    radius = document.getElementById("brushSizeNumberForm").value;
 }
 
 //onmousemove functions --------------------------------------------------------
@@ -810,12 +807,9 @@ function DryBrush_onmousemove(e)
             var radius = 30;
             var offsetX = getRandomInt(-radius, radius);
             var offsetY = getRandomInt(-radius, radius);
-            ctx.fillRect(clientX + offsetX, clientY + offsetY, 1, 1);
+            ctx.fillRect(e.clientX - el.offsetLeft + offsetX, e.clientY - el.offsetTop + offsetY, 1, 1);
         }
     }
-  
-  
-    
 }
 
 function PointBasedApproach_onmousemove(e)
@@ -851,28 +845,17 @@ function PointBasedWithShadows_onmousemove(e)
 
 function EdgeSmoothingWithRadialGradient_onmousemove(e)
 {
-    if (!isDrawing) return;
-  
-    var currentPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
-    var dist = distanceBetween(lastPoint, currentPoint);
-    var angle = angleBetween(lastPoint, currentPoint);
-
-    for (var i = 0; i < dist; i+=5) {
-
-      x = lastPoint.x + (Math.sin(angle) * i);
-      y = lastPoint.y + (Math.cos(angle) * i);
-
-      var radgrad = ctx.createRadialGradient(x,y,10,x,y,20);
-
-      radgrad.addColorStop(0, '#000');
-      radgrad.addColorStop(0.5, 'rgba(0,0,0,0.5)');
-      radgrad.addColorStop(1, 'rgba(0,0,0,0)');
-
-      ctx.fillStyle = radgrad;
-       ctx.fillRect(x-20, y-20, 40, 40);
-    }
-
-    lastPoint = currentPoint;
+    if (isDrawing) {
+    var radgrad = ctx.createRadialGradient(
+      e.clientX - el.offsetLeft, e.clientY - el.offsetTop, radius/2, e.clientX - el.offsetLeft, e.clientY - el.offsetTop, radius);
+    
+    radgrad.addColorStop(0, '#000');
+    radgrad.addColorStop(0.5, 'rgba(0,0,0,0.5)');
+    radgrad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = radgrad;
+    
+    ctx.fillRect(e.clientX - el.offsetLeft - radius, e.clientY - el.offsetTop - radius, radius*2, radius*2);
+  }
 }
 
 function BezierCurves_onmousemove(e)
@@ -905,45 +888,6 @@ function BezierCurves_onmousemove(e)
     ctx.stroke();
 }
 
-function BrushFurPen_onmousemove(e)
-{
-    if (!isDrawing) return;
-  
-    var currentPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
-    var dist = distanceBetween(lastPoint, currentPoint);
-    var angle = angleBetween(lastPoint, currentPoint);
-
-    for (var i = 0; i < dist; i++) {
-      x = lastPoint.x + (Math.sin(angle) * i) - 25;
-      y = lastPoint.y + (Math.cos(angle) * i) - 25;
-      ctx.drawImage(img, x, y);
-    }
-
-    lastPoint = currentPoint;
-}
-
-function FurRotatingStrokes_onmousemove(e)
-{
-    if (!isDrawing) return;
-  
-    var currentPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
-    var dist = distanceBetween(lastPoint, currentPoint);
-    var angle = angleBetween(lastPoint, currentPoint);
-
-    for (var i = 0; i < dist; i++) {
-      x = lastPoint.x + (Math.sin(angle) * i);
-      y = lastPoint.y + (Math.cos(angle) * i);
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.scale(0.5, 0.5);
-      ctx.rotate(Math.PI * 180 / getRandomInt(0, 180));
-      ctx.drawImage(img, 0, 0);
-      ctx.restore();
-    }
-
-    lastPoint = currentPoint;
-}
-
 function PenVariableSegmentWidth_onmousemove(e)
 {
     if (!isDrawing) return;
@@ -953,7 +897,7 @@ function PenVariableSegmentWidth_onmousemove(e)
     points.push({ 
       x: e.clientX - el.offsetLeft, 
       y: e.clientY - el.offsetTop,
-      width: getRandomInt(3, 5)
+      width: getRandomInt(0, document.getElementById("brushSizeNumberForm").value)
     });
 
     for (var i = 1; i < points.length; i++) {
@@ -971,16 +915,16 @@ function PenMultipleStrokes_onmousemove(e)
 
     ctx.beginPath();
 
-    ctx.moveTo(lastPoint.x - getRandomInt(0, 2), lastPoint.y - getRandomInt(0, 2));
-    ctx.lineTo(e.clientX - el.offsetLeft - getRandomInt(0, 2), e.clientY - el.offsetTop - getRandomInt(0, 2));
+    ctx.moveTo(lastPoint.x - getRandomInt(0, radius), lastPoint.y - getRandomInt(0, radius));
+    ctx.lineTo(e.clientX - el.offsetLeft - getRandomInt(0, radius), e.clientY - el.offsetTop - getRandomInt(0, radius));
     ctx.stroke();
 
     ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x + getRandomInt(0, 2), lastPoint.y + getRandomInt(0, 2));
-    ctx.lineTo(e.clientX - el.offsetLeft + getRandomInt(0, 2), e.clientY - el.offsetTop + getRandomInt(0, 2));
+    ctx.moveTo(lastPoint.x + getRandomInt(0, radius), lastPoint.y + getRandomInt(0, radius));
+    ctx.lineTo(e.clientX - el.offsetLeft + getRandomInt(0, radius), e.clientY - el.offsetTop + getRandomInt(0, radius));
     ctx.stroke();
 
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -995,8 +939,8 @@ function ThickBrush_onmousemove(e)
     ctx.lineTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x - 5, lastPoint.y - 5);
-    ctx.lineTo(e.clientX - el.offsetLeft - 5, e.clientY - el.offsetTop - 5);
+    ctx.moveTo(lastPoint.x - radius, lastPoint.y - radius);
+    ctx.lineTo(e.clientX - el.offsetLeft - radius, e.clientY - el.offsetTop - radius);
     ctx.stroke();
 
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -1013,20 +957,20 @@ function SlicedStrokes_onmousemove(e)
     ctx.lineTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x - 4, lastPoint.y - 4);
-    ctx.lineTo(e.clientX - el.offsetLeft - 4, e.clientY - el.offsetTop - 4);
+    ctx.moveTo(lastPoint.x - radius*2, lastPoint.y - radius*2);
+    ctx.lineTo(e.clientX - el.offsetLeft - radius*2, e.clientY - el.offsetTop - radius*2);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x - 2, lastPoint.y - 2);
-    ctx.lineTo(e.clientX - el.offsetLeft - 2, e.clientY - el.offsetTop - 2);
+    ctx.moveTo(lastPoint.x - radius, lastPoint.y - radius);
+    ctx.lineTo(e.clientX - el.offsetLeft - radius, e.clientY - el.offsetTop - radius);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x + 2, lastPoint.y + 2);
-    ctx.lineTo(e.clientX - el.offsetLeft + 2, e.clientY - el.offsetTop + 2);
+    ctx.moveTo(lastPoint.x + radius*2 - radius, lastPoint.y + radius*2 - radius);
+    ctx.lineTo(e.clientX - el.offsetLeft + radius*2 - radius, e.clientY - el.offsetTop + radius*2 - radius);
     ctx.stroke();
 
-    ctx.moveTo(lastPoint.x + 4, lastPoint.y + 4);
-    ctx.lineTo(e.clientX - el.offsetLeft + 4, e.clientY - el.offsetTop + 4);
+    ctx.moveTo(lastPoint.x + radius*2, lastPoint.y + radius*2);
+    ctx.lineTo(e.clientX - el.offsetLeft + radius*2, e.clientY - el.offsetTop + radius*2);
     ctx.stroke();
 
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -1039,28 +983,28 @@ function SlicedStrokesWithOpacity_onmousemove(e)
     ctx.beginPath();
 
     ctx.globalAlpha = 1;
-    ctx.moveTo(lastPoint.x - 4, lastPoint.y - 4);
-    ctx.lineTo(e.clientX - el.offsetLeft - 4, e.clientY - el.offsetTop - 4);
+    ctx.moveTo(lastPoint.x - radius*2, lastPoint.y - radius*2);
+    ctx.lineTo(e.clientX - el.offsetLeft - radius*2, e.clientY - el.offsetTop - radius*2);
+    ctx.stroke();
+
+    ctx.globalAlpha = 0.8;
+    ctx.moveTo(lastPoint.x - radius, lastPoint.y - radius);
+    ctx.lineTo(e.clientX - el.offsetLeft - radius, e.clientY - el.offsetTop - radius);
     ctx.stroke();
 
     ctx.globalAlpha = 0.6;
-    ctx.moveTo(lastPoint.x - 2, lastPoint.y - 2);
-    ctx.lineTo(e.clientX - el.offsetLeft - 2, e.clientY - el.offsetTop - 2);
-    ctx.stroke();
-
-    ctx.globalAlpha = 0.4;
     ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     ctx.stroke();
 
-    ctx.globalAlpha = 0.3;
-    ctx.moveTo(lastPoint.x + 2, lastPoint.y + 2);
-    ctx.lineTo(e.clientX - el.offsetLeft + 2, e.clientY - el.offsetTop + 2);
+    ctx.globalAlpha = 0.4;
+    ctx.moveTo(lastPoint.x + radius*2 - radius, lastPoint.y + radius*2 - radius);
+    ctx.lineTo(e.clientX - el.offsetLeft + radius*2 - radius, e.clientY - el.offsetTop + radius*2 - radius);
     ctx.stroke();
-
+    
     ctx.globalAlpha = 0.2;
-    ctx.moveTo(lastPoint.x + 4, lastPoint.y + 4);
-    ctx.lineTo(e.clientX - el.offsetLeft + 4, e.clientY - el.offsetTop + 4);
+    ctx.moveTo(lastPoint.x + radius*2, lastPoint.y + radius*2);
+    ctx.lineTo(e.clientX - el.offsetLeft + radius*2, e.clientY - el.offsetTop + radius*2);
     ctx.stroke();
 
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
@@ -1073,45 +1017,12 @@ function MultipleLines_onmousemove(e)
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    stroke(offsetPoints(-4));
-    stroke(offsetPoints(-2));
+    stroke(offsetPoints(-radius*2));
+    stroke(offsetPoints(-radius));
     stroke(points);
-    stroke(offsetPoints(2));
-    stroke(offsetPoints(4));
+    stroke(offsetPoints(radius*2 - radius));
+    stroke(offsetPoints(radius*2));
   };
-
-  function offsetPoints(val) {
-    var offsetPoints = [ ];
-    for (var i = 0; i < points.length; i++) {
-      offsetPoints.push({ 
-        x: points[i].x + val,
-        y: points[i].y + val
-      });
-    }
-    return offsetPoints;
-  }
-
-  function stroke(points) {
-    var p1 = points[0];
-    var p2 = points[1];
-
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-
-    for (var i = 1, len = points.length; i < len; i++) {
-      // we pick the point between pi+1 & pi+2 as the
-      // end point and p1 as our control point
-      var midPoint = midPointBtw(p1, p2);
-      ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
-      p1 = points[i];
-      p2 = points[i+1];
-    }
-    // Draw last line as a straight line while
-    // we wait for the next point to be able to calculate
-    // the bezier control point
-    ctx.lineTo(p1.x, p1.y);
-    ctx.stroke();
-}
 
 function MultipleLinesWithOpacity_onmousemove(e)
 {
@@ -1120,16 +1031,16 @@ function MultipleLinesWithOpacity_onmousemove(e)
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    ctx.strokeStyle = 'rgba(0,0,0,1)';
-    stroke(offsetPoints(-4));
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    stroke(offsetPoints(-2));
-    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.globalAlpha = 1;
+    stroke(offsetPoints(-radius*2));
+    ctx.globalAlpha = 0.8;
+    stroke(offsetPoints(-radius));
+    ctx.globalAlpha = 0.6;
     stroke(points);
-    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-    stroke(offsetPoints(2));
-    ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-    stroke(offsetPoints(4));
+    ctx.globalAlpha = 0.4;
+    stroke(offsetPoints(radius*2 - radius));
+    ctx.globalAlpha = 0.2;
+    stroke(offsetPoints(radius*2));
   };
 
   function offsetPoints(val) {
@@ -1189,10 +1100,10 @@ function StampLikeTrailEffect_onmousemove(e)
     var angle = angleBetween(lastPoint, currentPoint);
 
     for (var i = 0; i < dist; i+=5) {
-      x = lastPoint.x + (Math.sin(angle) * i) - 25;
-      y = lastPoint.y + (Math.cos(angle) * i) - 25;
+      x = lastPoint.x + (Math.sin(angle) * i) - radius;
+      y = lastPoint.y + (Math.cos(angle) * i) - radius;
       ctx.beginPath();
-      ctx.arc(x+10, y+10, 20, false, Math.PI * 2, false);
+      ctx.arc(x+(radius/2), y+(radius/2), radius, 0, Math.PI * 2, false);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -1231,7 +1142,7 @@ function Stars_onmousemove(e)
 
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     for (var i = 0; i < points.length; i++) {
-      drawStar(points[i].x, points[i].y);
+      drawStar1(points[i].x, points[i].y, radius);
     }
 }
 
@@ -1243,7 +1154,7 @@ function StarsWithRotation_onmousemove(e)
 
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     for (var i = 0; i < points.length; i++) {
-      drawStar(points[i].x, points[i].y, points[i].angle);
+      drawStar2(points[i].x, points[i].y, radius, points[i].angle);
     }
 }
 
@@ -1255,7 +1166,7 @@ function RandomizeEverything_onmousemove(e)
 
     //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     for (var i = 0; i < points.length; i++) {
-      drawStar(points[i]);
+      drawStar(points[i], radius);
     }
 }
 
@@ -1268,7 +1179,7 @@ function ColoredPixels_onmousemove(e)
     lastPoint = { x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop };
 }
 
-function Spray_onmousemove(e)
+function Spray1_onmousemove(e)
 {
     if (isDrawing) {
     for (var i = density; i--; ) {
@@ -1298,24 +1209,22 @@ function RandomizingDots_onmousemove(e)
     clientY = e.clientY - el.offsetTop;
 }
 
-function NeighborPointsConnection_onmousemove(e)
+function Blur_onmousemove(e)
 {
-    if (!isDrawing) return;
-
-    //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    for (var i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-      var nearPoint = points[i-5];
-      if (nearPoint) {
-        ctx.moveTo(nearPoint.x, nearPoint.y);
-        ctx.lineTo(points[i].x, points[i].y);
-      }
+    var imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+    var data = imageData.data;
+    for(var i = 0; i < data.length; i += 4)
+    {
+        
     }
-    ctx.stroke();
+}
+
+function Blend_onmousemove(e){
+    
+}
+
+function Smudge_onmousemove(e){
+    
 }
 
 //onmouseup functions ----------------------------------------------------------
@@ -1386,22 +1295,6 @@ function BezierCurves_onmouseup()
     }
     isDrawing = false;
     points.length = 0;
-}
-
-function BrushFurPen_onmouseup()
-{
-    if(isDrawing){
-        ctx.closePath();
-    }
-    isDrawing = false;
-}
-
-function FurRotatingStrokes_onmouseup()
-{
-    if(isDrawing){
-        ctx.closePath();
-    }
-    isDrawing = false;
 }
 
 function PenVariableSegmentWidth_onmouseup()
@@ -1515,7 +1408,7 @@ function ColoredPixels_onmouseup()
     isDrawing = false;
 }
 
-function Spray_onmouseup()
+function Spray1_onmouseup()
 {
     if(isDrawing){
         ctx.closePath();
@@ -1538,13 +1431,20 @@ function RandomizingDots_onmouseup()
     clearTimeout(timeout);
 }
 
-function NeighborPointsConnection_onmouseup()
+function Blur_onmouseup(e)
 {
-    if(isDrawing){
-        ctx.closePath();
-    }
     isDrawing = false;
-    points.length = 0;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+}
+
+function Blend_onmouseup(e){
+    isDrawing = false;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+}
+
+function Smudge_onmouseup(e){
+    isDrawing = false;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
 }
 
 //------------------------------------------------------------------------------
