@@ -174,3 +174,19 @@ a{
       background-image: url('img/RandomizingDots.PNG');
       background-repeat: no-repeat;
   }
+  button#b27{
+      background-image: url('img/Eraser.PNG');
+      background-repeat: no-repeat;
+  }
+  button#b28{
+      background-image: url('img/Blur.PNG');
+      background-repeat: no-repeat;
+  }
+  button#b29{
+      background-image: url('img/Smudge.PNG');
+      background-repeat: no-repeat;
+  }
+  button#b30{
+      background-image: url('img/Blend.PNG');
+      background-repeat: no-repeat;
+  }
