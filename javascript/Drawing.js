@@ -7,6 +7,9 @@ var startingStroke = true;
 var points = [];
 var clientX, clientY, timeout;
 var density = 50;
+var imageData;
+var data;
+var alphaCounter = 255;
 
 function draw(){
     el.onmousedown = function(e) {
@@ -92,15 +95,18 @@ function draw(){
             case 28: //Neighbor points connection
                 RandomizingDots_onmousedown(e);
                 break; 
-            case 29: //Blur Brush
-                Blur_onmousedown(e);
+            case 29: //Eraser Brush
+                Eraser_onmousedown(e);
                 break; 
-            case 30: //blend Brush
+            case 30: //blur Brush
                 Blur_onmousedown(e);
                 break; 
             case 31: //smudge Brush
-                Blur_onmousedown(e);
+                Smudge_onmousedown(e);
                 break; 
+            case 32: //smudge Brush
+                Blend_onmousedown(e);
+                break;
             default:
                 SimplePencil_onmousedown(e);
                 break;
@@ -189,6 +195,18 @@ function draw(){
             case 28: //Neighbor points connection
                 RandomizingDots_onmousemove(e);
                 break; 
+            case 29: //Eraser Brush
+                Eraser_onmousemove(e);
+                break; 
+            case 30: //blur Brush
+                Blur_onmousemove(e);
+                break; 
+            case 31: //smudge Brush
+                Smudge_onmousemove(e);
+                break; 
+            case 32: //smudge Brush
+                Blend_onmousemove(e);
+                break;
             default:
                 SimplePencil_onmousemove(e);
                 break;
@@ -277,6 +295,18 @@ function draw(){
             case 28: //Neighbor points connection
                 RandomizingDots_onmouseup();
                 break; 
+            case 29: //Eraser Brush
+                Eraser_onmouseup();
+                break; 
+            case 30: //blur Brush
+                Blur_onmouseup();
+                break; 
+            case 31: //smudge Brush
+                Smudge_onmouseup();
+                break; 
+            case 32: //smudge Brush
+                Blend_onmouseup();
+                break;
             default:
                 SimplePencil_onmouseup();
                 break;
@@ -755,23 +785,39 @@ function RandomizingDots_onmousedown(e)
     }, 50);
 }
 
-function Blur_onmousedown(e)
+function Eraser_onmousedown(e)
 {
     isDrawing = true;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
 }
 
-function Blend_onmousedown(e){
+function Blur_onmousedown(e){
     isDrawing = true;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
+    if(radius < 4){
+        radius = 5;
+    }
 }
 
 function Smudge_onmousedown(e){
     isDrawing = true;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
+    
+    //grab the image data at the current moise location
+    imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+    data = imageData.data;
+}
+
+function Blend_onmousedown(e){
+    isDrawing = true;
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    radius = document.getElementById("brushSizeNumberForm").value;
+    
+    imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+    data = imageData.data;
 }
 
 //onmousemove functions --------------------------------------------------------
@@ -1209,22 +1255,106 @@ function RandomizingDots_onmousemove(e)
     clientY = e.clientY - el.offsetTop;
 }
 
-function Blur_onmousemove(e)
+function Eraser_onmousemove(e)
 {
-    var imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-    var data = imageData.data;
-    for(var i = 0; i < data.length; i += 4)
-    {
+    if(isDrawing){
+        imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+        data = imageData.data;
+        for(var i = 0; i < data.length; i += 4)
+        {
+            //lower alpha value of each pixel
+            data[i + 3] -= 255;
+        }
+        ctx.putImageData(imageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
+    }
+}
+
+function Blur_onmousemove(e){
+    if(isDrawing){
+        //get the image data to blur
+        imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+        data = imageData.data;
         
+        //use the temp canvas to apply a blur effect
+        var tempCanvas = document.getElementById("imageBox");
+        var tempContext = tempCanvas.getContext('2d');
+        tempContext.putImageData(imageData, 0, 0);
+        
+        //apply gausian blur
+        var filterCanvas = document.getElementById("filterBox");
+        var filterContext = filterCanvas.getContext('2d');
+        filterContext.filter = 'blur(1px)';
+        filterContext.drawImage(tempCanvas, 0, 0);
+        
+        //retrieve blurred image
+        var filteredImageData = filterContext.getImageData(2, 2, radius-4, radius-4);
+        
+        //put blurred data back into the original image
+        ctx.putImageData(filteredImageData, e.clientX - el.offsetLeft - (radius/2) + 2, e.clientY - el.offsetTop - (radius/2) + 2);
+        
+        imageData = null;
+        data = null;
+        //clear the Canvases used for the filter process
+        tempContext.clearRect(0, 0, 50, 50);
+        filterContext.filter = "none";
+        filterContext.clearRect(0, 0, 50, 50);
+    }
+}
+
+function Smudge_onmousemove(e){
+    if(alphaCounter <= 0)
+    {
+        isDrawing = false;
+    }
+    if(isDrawing){
+        //get the imageData at the current location of the mouse cursor
+        tempImageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+        tempData = tempImageData.data;
+        
+        for(var i = 0; i < data.length; i += 4)
+        {
+            //lower alpha value of each pixel as the mouse is moved
+            data[i + 3] = alphaCounter;
+        }
+        
+        for(var i = 0; i < data.length; i+=4)
+        {
+            data[i] = ((tempData[i] + data[i])/2);//red
+            data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            if(data[i+3] < tempData[i+3]){
+                data[i+3] = tempData[i+3];
+            }
+        }
+        
+        ctx.putImageData(imageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
+        alphaCounter -= 5;
     }
 }
 
 function Blend_onmousemove(e){
+    if(isDrawing){
+        //get the imageData at the current location of the mouse
+        tempImageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+        tempData = tempImageData.data;
     
-}
-
-function Smudge_onmousemove(e){
-    
+        for(var i = 0; i < data.length; i += 4)
+        {
+            //average the colors of each pixel between the imageData objects (the first one
+            //was made when the mouse was clicked, the second just a moment ago when the mouse was moved)
+            tempData[i] = ((tempData[i] + data[i])/2);//red
+            tempData[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            tempData[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
+        }
+        
+        //now place the altered tempImageData back into the canvas where the user is drawing
+        ctx.putImageData(tempImageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
+        
+        //now make temp the original for the next time the mouse is moved
+        imageData = tempImageData;
+        data = tempData;
+    }
 }
 
 //onmouseup functions ----------------------------------------------------------
@@ -1431,20 +1561,22 @@ function RandomizingDots_onmouseup()
     clearTimeout(timeout);
 }
 
-function Blur_onmouseup(e)
+function Eraser_onmouseup()
 {
     isDrawing = false;
-    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
 }
 
-function Blend_onmouseup(e){
+function Blur_onmouseup(){
     isDrawing = false;
-    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
 }
 
-function Smudge_onmouseup(e){
+function Smudge_onmouseup(){
     isDrawing = false;
-    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    alphaCounter = 255;
+}
+
+function Blend_onmouseup(){
+    isDrawing = false;
 }
 
 //------------------------------------------------------------------------------

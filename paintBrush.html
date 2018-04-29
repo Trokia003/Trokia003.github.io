@@ -15,7 +15,12 @@ and open the template in the editor.
             <div id="color_and_size_options">
                 <!--this will hold the value associated with different brush types (this setup is probably temporary)-->
                 <input type="number" id="brushSelected" value="1" hidden/>
-
+                
+                    <canvas id="filterBox" width="50" height="50" ></canvas>
+                
+                
+                    <canvas id="imageBox" width="50" height="50" ></canvas>
+                
                 <!--these sliders will represent the color selectors-->
 
                 <div style="margin-top: 20px">
@@ -87,6 +92,10 @@ and open the template in the editor.
                 <button class="brush_button" id="b24" onclick="changeBrush(26);"></button>
                 <button class="brush_button" id="b25" onclick="changeBrush(27);"></button>
                 <button class="brush_button" id="b26" onclick="changeBrush(28);"></button>
+                <button class="brush_button" id="b27" onclick="changeBrush(29);">Eraser</button>
+                <button class="brush_button" id="b28" onclick="changeBrush(30);">Blur</button>
+                <button class="brush_button" id="b29" onclick="changeBrush(31);">Smudge</button>
+                <button class="brush_button" id="b30" onclick="changeBrush(32);">Blend</button>
             </div>    
         </div>
         
