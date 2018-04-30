@@ -83,63 +83,63 @@ a{
       background-repeat: no-repeat;
   }
   button#b4{
-      background-image: url('img/DryBrush.PNG');
+      background-image: url('img/dryBrush.PNG');
       background-repeat: no-repeat;
   }
   button#b5{
-      background-image: url('img/PointBasedApproach.PNG');
+      background-image: url('img/pointBasedApproach.PNG');
       background-repeat: no-repeat;
   }
   button#b6{
-      background-image: url('img/PointBasedWithShadows.PNG');
+      background-image: url('img/pointBasedWithShadows.PNG');
       background-repeat: no-repeat;
   }
   button#b7{
-      background-image: url('img/EdgeSmoothingWithRadialGradient.PNG');
+      background-image: url('img/edgeSmoothingWithRadialGradient.PNG');
       background-repeat: no-repeat;
   }
   button#b8{
-      background-image: url('img/BezierCurves.PNG');
+      background-image: url('img/bezierCurves.PNG');
       background-repeat: no-repeat;
   }
   button#b9{
-      background-image: url('img/PenVariableSegmentWidth.PNG');
+      background-image: url('img/penVariableSegmentWidth.PNG');
       background-repeat: no-repeat;
   }
   button#b10{
-      background-image: url('img/PenMultipleStrokes.PNG');
+      background-image: url('img/penMultipleStrokes.PNG');
       background-repeat: no-repeat;
   }
   button#b11{
-      background-image: url('img/ThickBrush.PNG');
+      background-image: url('img/thickBrush.PNG');
       background-repeat: no-repeat;
   }
   button#b12{
-      background-image: url('img/SlicedStrokes.PNG');
+      background-image: url('img/slicedStrokes.PNG');
       background-repeat: no-repeat;
   }
   button#b13{
-      background-image: url('img/SlicedStrokesWithOpacity.PNG');
+      background-image: url('img/slicedStrokesWithOpacity.PNG');
       background-repeat: no-repeat;
   }
   button#b14{
-      background-image: url('img/MultipleLines.PNG');
+      background-image: url('img/multipleLines.PNG');
       background-repeat: no-repeat;
   }
   button#b15{
-      background-image: url('img/MultipleLinesWithOpacity.PNG');
+      background-image: url('img/multipleLinesWithOpacity.PNG');
       background-repeat: no-repeat;
   }
   button#b16{
-      background-image: url('img/StampLikeBasic.PNG');
+      background-image: url('img/stampLikeBasic.PNG');
       background-repeat: no-repeat;
   }
   button#b17{
-      background-image: url('img/StampLikeTrailEffect.PNG');
+      background-image: url('img/stampLikeTrailEffect.PNG');
       background-repeat: no-repeat;
   }
   button#b18{
-      background-image: url('img/RandomRadiusOpacity.PNG');
+      background-image: url('img/randomRadiusOpacity.PNG');
       background-repeat: no-repeat;
   }
   button#b19{
@@ -147,35 +147,35 @@ a{
       background-repeat: no-repeat;
   }
   button#b20{
-      background-image: url('img/StarsWithRotation.PNG');
+      background-image: url('img/starsWithRotation.PNG');
       background-repeat: no-repeat;
   }
   button#b21{
-      background-image: url('img/RandomizeEverythingStars.PNG');
+      background-image: url('img/randomizeEverythingStars.PNG');
       background-repeat: no-repeat;
   }
   button#b22{
-      background-image: url('img/ColoredPixels.PNG');
+      background-image: url('img/coloredPixels.PNG');
       background-repeat: no-repeat;
   }
   button#b23{
-      background-image: url('img/Spray.PNG');
+      background-image: url('img/spray.PNG');
       background-repeat: no-repeat;
   }
   button#b24{
-      background-image: url('img/TimeBasedSpray.PNG');
+      background-image: url('img/timeBasedSpray.PNG');
       background-repeat: no-repeat;
   }
   button#b25{
-      background-image: url('img/TimeBasedSprayWithRoundDistribution.PNG');
+      background-image: url('img/timeBasedSprayWithRoundDistribution.PNG');
       background-repeat: no-repeat;
   }
   button#b26{
-      background-image: url('img/RandomizingDots.PNG');
+      background-image: url('img/randomizingDots.PNG');
       background-repeat: no-repeat;
   }
   button#b27{
-      background-image: url('img/Eraser.PNG');
+      background-image: url('img/Eraser.png');
       background-repeat: no-repeat;
   }
   button#b28{
