@@ -37,6 +37,7 @@ a{
     border-color: #2F4F4F;
     border-width: 5px;
     border-style: solid;
+    cursor: crosshair;
   }
   
 #brushtype_buttons{
@@ -190,3 +191,4 @@ a{
       background-image: url('img/Blend.PNG');
       background-repeat: no-repeat;
   }
+  
