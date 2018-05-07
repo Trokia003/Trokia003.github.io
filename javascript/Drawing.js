@@ -436,6 +436,50 @@ function drawPixels(x, y) {
   }
 }
 
+//this method will perform the blending actions
+function blend(xStart, yStart, xEnd, yEnd){
+    
+    //how many times will we perform a blend?
+    var xDistance = xEnd - xStart;
+    var yDistance = yEnd - yStart;
+    var blendsNeeded = Math.abs(xDistance);
+    var currentX = xStart;
+    var currentY = yStart;
+    
+    //for each individual blend
+    for(var currentBlend = 1; currentBlend <= blendsNeeded; currentBlend++){
+        //get the starting image data
+        imageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
+        data = imageData.data;
+        
+        //for each blend, change the current x value to fit the slope
+        currentX = xStart + (currentBlend/blendsNeeded) * xDistance;
+        //for each blend, change the current y value to fit the slope
+        currentY = yStart + Math.round((currentBlend/blendsNeeded) * yDistance);
+        
+        //get the current set of pixels to blend
+        tempImageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
+        tempData = tempImageData.data;
+        
+        for(var i = 0; i < data.length; i += 4)
+        {
+            //average the colors of each pixel between the imageData objects (the first one
+            //was made when the mouse was clicked, the second just a moment ago when the mouse was moved)
+            tempData[i] = ((tempData[i] + data[i])/2);//red
+            tempData[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            tempData[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
+        }
+        
+        //now place the altered tempImageData back into the canvas where the user is drawing
+        ctx.putImageData(tempImageData, currentX - (radius/2), currentY - (radius/2));
+
+        //now make temp the original for the next time the mouse is moved
+        imageData = tempImageData;
+        data = tempData;
+    }
+}
+
 //these are the brushes
 //onmousedown functions --------------------------------------------------------
 
@@ -496,6 +540,7 @@ function PointBasedApproach_onmousedown(e)
     isDrawing = true;
     ctx.lineWidth = document.getElementById("brushSizeNumberForm").value;
     ctx.lineJoin = ctx.lineCap = 'round';
+    ctx.strokeStyle = document.getElementById("RGBLabel").innerHTML;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
 }
 
@@ -812,12 +857,13 @@ function Smudge_onmousedown(e){
 }
 
 function Blend_onmousedown(e){
+    if(!isDrawing){
+        ctx.beginPath();
+    }
     isDrawing = true;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
-    
-    imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-    data = imageData.data;
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 }
 
 //onmousemove functions --------------------------------------------------------
@@ -862,11 +908,8 @@ function PointBasedApproach_onmousemove(e)
 {
     if (!isDrawing) return;
 
-    //if this line below is active, it cause subsequent lines to "erase" (cover up) past lines
-    //ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 
-    ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (var i = 1; i < points.length; i++) {
       ctx.lineTo(points[i].x, points[i].y);
@@ -1319,12 +1362,15 @@ function Smudge_onmousemove(e){
         
         for(var i = 0; i < data.length; i+=4)
         {
-            data[i] = ((tempData[i] + data[i])/2);//red
-            data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
-            data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
-            if(data[i+3] < tempData[i+3]){
-                data[i+3] = tempData[i+3];
-            }
+            if(tempData[i+3] != 0)
+            {
+                data[i] = ((tempData[i] + data[i])/2);//red
+                data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+                data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+                if(data[i+3] < tempData[i+3]){
+                    data[i+3] = tempData[i+3];
+                }
+            }   
         }
         
         ctx.putImageData(imageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
@@ -1333,28 +1379,15 @@ function Smudge_onmousemove(e){
 }
 
 function Blend_onmousemove(e){
-    if(isDrawing){
-        //get the imageData at the current location of the mouse
-        tempImageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-        tempData = tempImageData.data;
+    //if we are not supposed to be drawing, then do nothing
+    if (!isDrawing) return;
+
+    //get the current mouse location and store in "points"
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
     
-        for(var i = 0; i < data.length; i += 4)
-        {
-            //average the colors of each pixel between the imageData objects (the first one
-            //was made when the mouse was clicked, the second just a moment ago when the mouse was moved)
-            tempData[i] = ((tempData[i] + data[i])/2);//red
-            tempData[i+1] = ((tempData[i+1] + data[i+1])/2);//green
-            tempData[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
-            tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
-        }
-        
-        //now place the altered tempImageData back into the canvas where the user is drawing
-        ctx.putImageData(tempImageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
-        
-        //now make temp the original for the next time the mouse is moved
-        imageData = tempImageData;
-        data = tempData;
-    }
+    //send the last pair of points to be blended
+    blend(points[points.length - 2].x, points[points.length - 2].y, points[points.length - 1].x, points[points.length - 1].y);
+    
 }
 
 //onmouseup functions ----------------------------------------------------------
@@ -1576,7 +1609,11 @@ function Smudge_onmouseup(){
 }
 
 function Blend_onmouseup(){
+    if(isDrawing){
+        ctx.closePath();
+    }
     isDrawing = false;
+    points.length = 0;
 }
 
 //------------------------------------------------------------------------------
