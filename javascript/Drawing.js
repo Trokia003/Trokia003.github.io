@@ -1327,27 +1327,10 @@ function Smudge_onmousemove(e){
             tempData[i+1] = ((dataGreen + tempDataGreen)/2);//green
             tempData[i+2] = ((dataBlue + tempDataBlue)/2);//blue
             tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
-        }
-        
-        //place the tempDataImage back into the canvas
-        ctx.putImageData(tempImageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
-
-        //if the colors are stronger in tempData, replace the colors in data with them
-        for(var i = 0; i < data.length; i += 4)
-        {
-            var tempColor = (tempData[i] + tempData[i+1] + tempData[i+2]) * tempData[i + 3]/255;
-            var currentColor = (data[i] + data[i+1] + data[i+2]) * data[i + 3]/255;
             
-            if(tempColor > currentColor)
-            {
-                data[i] = tempData[i];
-                data[i+1] = tempData[i+1];
-                data[i+2] = tempData[i+2];
-                data[i+3] = tempData[i+3];
-            }
+            //place the tempDataImage back into the canvas
+            ctx.putImageData(tempImageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
         }
-        
-        data = tempData;
     }
 }
 
