@@ -9,6 +9,7 @@ var clientX, clientY, timeout;
 var density = 50;
 var imageData;
 var data;
+var alphaCounter = 255;
 
 function draw(){
     el.onmousedown = function(e) {
@@ -1301,36 +1302,33 @@ function Blur_onmousemove(e){
 }
 
 function Smudge_onmousemove(e){
+    if(alphaCounter <= 0)
+    {
+        isDrawing = false;
+    }
     if(isDrawing){
         //get the imageData at the current location of the mouse cursor
         tempImageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
         tempData = tempImageData.data;
         
-        //blend the colors of the corresponding pixels in both data and tempData
-        //blend with their alpha values in mind
         for(var i = 0; i < data.length; i += 4)
         {
-            //these are the values i will multiply the colors by when blending.
-            var dataAlphaMultiplier = data[i + 3]/255;
-            var tempDataAlphaMultiplier = tempData[i + 3]/255;
-            
-            //get the individual colors of each pixel and adjust them according to the current opacity (alpha)
-            var dataRed = Math.round(data[i] * dataAlphaMultiplier);
-            var dataGreen = Math.round(data[i + 1] * dataAlphaMultiplier);
-            var dataBlue = Math.round(data[i + 2] * dataAlphaMultiplier);
-            var tempDataRed = Math.round(tempData[i] * tempDataAlphaMultiplier);
-            var tempDataGreen = Math.round(tempData[i + 1] * tempDataAlphaMultiplier);
-            var tempDataBlue = Math.round(tempData[i + 2] * tempDataAlphaMultiplier);
-            
-            //combine the colors and place them in the tempData 
-            tempData[i] = ((dataRed + tempDataRed)/2);//red
-            tempData[i+1] = ((dataGreen + tempDataGreen)/2);//green
-            tempData[i+2] = ((dataBlue + tempDataBlue)/2);//blue
-            tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
-            
-            //place the tempDataImage back into the canvas
-            ctx.putImageData(tempImageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
+            //lower alpha value of each pixel as the mouse is moved
+            data[i + 3] = alphaCounter;
         }
+        
+        for(var i = 0; i < data.length; i+=4)
+        {
+            data[i] = ((tempData[i] + data[i])/2);//red
+            data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            if(data[i+3] < tempData[i+3]){
+                data[i+3] = tempData[i+3];
+            }
+        }
+        
+        ctx.putImageData(imageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
+        alphaCounter -= 5;
     }
 }
 
@@ -1574,6 +1572,7 @@ function Blur_onmouseup(){
 
 function Smudge_onmouseup(){
     isDrawing = false;
+    alphaCounter = 255;
 }
 
 function Blend_onmouseup(){
