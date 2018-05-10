@@ -9,7 +9,6 @@ var clientX, clientY, timeout;
 var density = 50;
 var imageData;
 var data;
-var alphaCounter = 255;
 
 function draw(){
     el.onmousedown = function(e) {
@@ -436,26 +435,135 @@ function drawPixels(x, y) {
   }
 }
 
+function blur(xStart, yStart, xEnd, yEnd){
+    
+    //how many times will we perform a blend?
+    var xDistance = xEnd - xStart;
+    var yDistance = yEnd - yStart;
+    var currentX = xStart;
+    var currentY = yStart;
+    var blursNeeded;
+    
+    if(Math.abs(xDistance) >= Math.abs(yDistance)){
+        blursNeeded = Math.abs(xDistance);
+    }
+    else{
+        blursNeeded = Math.abs(yDistance);
+    }
+    
+    //for each individual blend
+    for(var currentBlur = 1; currentBlur <= blursNeeded; currentBlur++){
+        //for each blend, change the current x value to fit the slope
+        currentX = xStart + Math.round((currentBlur/blursNeeded) * xDistance);
+        //for each blend, change the current y value to fit the slope
+        currentY = yStart + Math.round((currentBlur/blursNeeded) * yDistance);
+        
+        //get the image data to blur
+        imageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
+        data = imageData.data;
+
+        //use the temp canvas to apply a blur effect
+        var tempCanvas = document.getElementById("imageBox");
+        var tempContext = tempCanvas.getContext('2d');
+        tempContext.putImageData(imageData, 0, 0);
+
+        //apply gausian blur
+        var filterCanvas = document.getElementById("filterBox");
+        var filterContext = filterCanvas.getContext('2d');
+        filterContext.filter = 'blur(1px)';
+        filterContext.drawImage(tempCanvas, 0, 0);
+
+        //retrieve blurred image
+        var filteredImageData = filterContext.getImageData(2, 2, radius-4, radius-4);
+
+        //put blurred data back into the original image
+        ctx.putImageData(filteredImageData, currentX - (radius/2) + 2, currentY - (radius/2) + 2);
+
+        imageData = null;
+        data = null;
+        //clear the Canvases used for the filter process
+        tempContext.clearRect(0, 0, 50, 50);
+        filterContext.filter = "none";
+        filterContext.clearRect(0, 0, 50, 50);
+    }
+}
+
 //this method will perform the blending actions
 function blend(xStart, yStart, xEnd, yEnd){
     
     //how many times will we perform a blend?
     var xDistance = xEnd - xStart;
     var yDistance = yEnd - yStart;
-    var blendsNeeded = Math.abs(xDistance);
     var currentX = xStart;
     var currentY = yStart;
+    var blendsNeeded;
+    
+    if(Math.abs(xDistance) >= Math.abs(yDistance)){
+        blendsNeeded = Math.abs(xDistance);
+    }
+    else{
+        blendsNeeded = Math.abs(yDistance);
+    }
     
     //for each individual blend
     for(var currentBlend = 1; currentBlend <= blendsNeeded; currentBlend++){
+        //for each blend, change the current x value to fit the slope
+        currentX = xStart + Math.round((currentBlend/blendsNeeded) * xDistance);
+        //for each blend, change the current y value to fit the slope
+        currentY = yStart + Math.round((currentBlend/blendsNeeded) * yDistance);
+        
+        //get the current set of pixels to blend
+        tempImageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
+        tempData = tempImageData.data;
+        
+        for(var i = 0; i < data.length; i += 4)
+        {
+            //average the colors of each pixel between the imageData objects (the first one
+            //was made when the mouse was clicked, the second just a moment ago when the mouse was moved)
+            tempData[i] = ((tempData[i] + data[i])/2);//red
+            tempData[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            tempData[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
+            
+            
+            data[i] = ((tempData[i] + data[i])/2);//red
+            data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
+            data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
+            data[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
+        }
+        
+        //now place the altered tempImageData back into the canvas where the user is drawing
+        ctx.putImageData(tempImageData, currentX - (radius/2), currentY - (radius/2));
+    }
+}
+
+//this method will perform the blending actions
+function smudge(xStart, yStart, xEnd, yEnd){
+    
+    //how many times will we perform a blend?
+    var xDistance = xEnd - xStart;
+    var yDistance = yEnd - yStart;
+    var currentX = xStart;
+    var currentY = yStart;
+    var smudgesNeeded;
+    
+    if(Math.abs(xDistance) >= Math.abs(yDistance)){
+        smudgesNeeded = Math.abs(xDistance);
+    }
+    else{
+        smudgesNeeded = Math.abs(yDistance);
+    }
+    
+    //for each individual blend
+    for(var currentSmudge = 1; currentSmudge <= smudgesNeeded; currentSmudge++){
         //get the starting image data
         imageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
         data = imageData.data;
         
         //for each blend, change the current x value to fit the slope
-        currentX = xStart + (currentBlend/blendsNeeded) * xDistance;
+        currentX = xStart + Math.round((currentSmudge/smudgesNeeded) * xDistance);
         //for each blend, change the current y value to fit the slope
-        currentY = yStart + Math.round((currentBlend/blendsNeeded) * yDistance);
+        currentY = yStart + Math.round((currentSmudge/smudgesNeeded) * yDistance);
         
         //get the current set of pixels to blend
         tempImageData = ctx.getImageData(currentX - (radius/2), currentY - (radius/2), radius, radius);
@@ -473,7 +581,7 @@ function blend(xStart, yStart, xEnd, yEnd){
         
         //now place the altered tempImageData back into the canvas where the user is drawing
         ctx.putImageData(tempImageData, currentX - (radius/2), currentY - (radius/2));
-
+        
         //now make temp the original for the next time the mouse is moved
         imageData = tempImageData;
         data = tempData;
@@ -838,22 +946,26 @@ function Eraser_onmousedown(e)
 }
 
 function Blur_onmousedown(e){
+    if(!isDrawing){
+        ctx.beginPath();
+    }
     isDrawing = true;
-    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
-    radius = document.getElementById("brushSizeNumberForm").value;
     if(radius < 4){
         radius = 5;
     }
+    ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
+    radius = document.getElementById("brushSizeNumberForm").value;
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 }
 
 function Smudge_onmousedown(e){
+    if(!isDrawing){
+        ctx.beginPath();
+    }
     isDrawing = true;
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
-    
-    //grab the image data at the current moise location
-    imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-    data = imageData.data;
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
 }
 
 function Blend_onmousedown(e){
@@ -864,6 +976,10 @@ function Blend_onmousedown(e){
     ctx.moveTo(e.clientX - el.offsetLeft, e.clientY - el.offsetTop);
     radius = document.getElementById("brushSizeNumberForm").value;
     points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
+    
+    //get the starting image data
+    imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
+    data = imageData.data;
 }
 
 //onmousemove functions --------------------------------------------------------
@@ -1313,69 +1429,25 @@ function Eraser_onmousemove(e)
 }
 
 function Blur_onmousemove(e){
-    if(isDrawing){
-        //get the image data to blur
-        imageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-        data = imageData.data;
-        
-        //use the temp canvas to apply a blur effect
-        var tempCanvas = document.getElementById("imageBox");
-        var tempContext = tempCanvas.getContext('2d');
-        tempContext.putImageData(imageData, 0, 0);
-        
-        //apply gausian blur
-        var filterCanvas = document.getElementById("filterBox");
-        var filterContext = filterCanvas.getContext('2d');
-        filterContext.filter = 'blur(1px)';
-        filterContext.drawImage(tempCanvas, 0, 0);
-        
-        //retrieve blurred image
-        var filteredImageData = filterContext.getImageData(2, 2, radius-4, radius-4);
-        
-        //put blurred data back into the original image
-        ctx.putImageData(filteredImageData, e.clientX - el.offsetLeft - (radius/2) + 2, e.clientY - el.offsetTop - (radius/2) + 2);
-        
-        imageData = null;
-        data = null;
-        //clear the Canvases used for the filter process
-        tempContext.clearRect(0, 0, 50, 50);
-        filterContext.filter = "none";
-        filterContext.clearRect(0, 0, 50, 50);
-    }
+    //if we are not supposed to be drawing, then do nothing
+    if (!isDrawing) return;
+
+    //get the current mouse location and store in "points"
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
+    
+    //send the last pair of points to be blended
+    blur(points[points.length - 2].x, points[points.length - 2].y, points[points.length - 1].x, points[points.length - 1].y);
 }
 
 function Smudge_onmousemove(e){
-    if(alphaCounter <= 0)
-    {
-        isDrawing = false;
-    }
-    if(isDrawing){
-        //get the imageData at the current location of the mouse cursor
-        tempImageData = ctx.getImageData(e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2), radius, radius);
-        tempData = tempImageData.data;
-        
-        for(var i = 0; i < data.length; i += 4)
-        {
-            //lower alpha value of each pixel as the mouse is moved
-            data[i + 3] = alphaCounter;
-        }
-        
-        for(var i = 0; i < data.length; i+=4)
-        {
-            if(tempData[i+3] != 0)
-            {
-                data[i] = ((tempData[i] + data[i])/2);//red
-                data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
-                data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
-                if(data[i+3] < tempData[i+3]){
-                    data[i+3] = tempData[i+3];
-                }
-            }   
-        }
-        
-        ctx.putImageData(imageData, e.clientX - el.offsetLeft - (radius/2), e.clientY - el.offsetTop - (radius/2));
-        alphaCounter -= 5;
-    }
+    //if we are not supposed to be drawing, then do nothing
+    if (!isDrawing) return;
+
+    //get the current mouse location and store in "points"
+    points.push({ x: e.clientX - el.offsetLeft, y: e.clientY - el.offsetTop });
+    
+    //send the last pair of points to be blended
+    smudge(points[points.length - 2].x, points[points.length - 2].y, points[points.length - 1].x, points[points.length - 1].y);
 }
 
 function Blend_onmousemove(e){
@@ -1387,7 +1459,6 @@ function Blend_onmousemove(e){
     
     //send the last pair of points to be blended
     blend(points[points.length - 2].x, points[points.length - 2].y, points[points.length - 1].x, points[points.length - 1].y);
-    
 }
 
 //onmouseup functions ----------------------------------------------------------
@@ -1600,12 +1671,19 @@ function Eraser_onmouseup()
 }
 
 function Blur_onmouseup(){
+    if(isDrawing){
+        ctx.closePath();
+    }
     isDrawing = false;
+    points.length = 0;
 }
 
 function Smudge_onmouseup(){
+    if(isDrawing){
+        ctx.closePath();
+    }
     isDrawing = false;
-    alphaCounter = 255;
+    points.length = 0;
 }
 
 function Blend_onmouseup(){
