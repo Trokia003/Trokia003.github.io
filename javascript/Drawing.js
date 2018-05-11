@@ -526,10 +526,10 @@ function blend(xStart, yStart, xEnd, yEnd){
             tempData[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
             
             
-            data[i] = ((tempData[i] + data[i])/2);//red
-            data[i+1] = ((tempData[i+1] + data[i+1])/2);//green
-            data[i+2] = ((tempData[i+2] + data[i+2])/2);//blue
-            data[i+3] = ((tempData[i+3] + data[i+3])/2);//alpha
+            data[i] = tempData[i];//red
+            data[i+1] = tempData[i+1];//green
+            data[i+2] = tempData[i+2];//blue
+            data[i+3] = tempData[i+3];//alpha
         }
         
         //now place the altered tempImageData back into the canvas where the user is drawing
